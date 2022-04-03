@@ -1,0 +1,35 @@
+# Unreal Engine
+Binaries
+Build
+DerivedDataCache
+Intermediate
+Saved
+**/LearningKit_Games
+**/MilitaryWeapDark
+
+# Currently Unused assets
+Content/Assets/Animations/Unused
+
+# Rider files
+Plugins/Developer/RiderLink
+/.idea/*
+!/.idea/.idea.*
+/.idea/.idea.*/*
+!/.idea/.idea.*/.idea
+/.idea/.idea.*/.idea/*
+!/.idea/.idea.*/.idea/runConfigurations
+
+# Project files
+*.sln
+
+# Editor files
+.vscode
+.vs
+*.VC.db
+*.opensdf
+*.opendb
+*.sdf
+*.sln
+*.suo
+*.xcodeproj
+*.xcworkspace
