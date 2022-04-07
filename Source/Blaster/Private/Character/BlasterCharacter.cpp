@@ -1,11 +1,12 @@
 // kata.codes
 #include "Character/BlasterCharacter.h"
-
 #include "BlasterComponents/CombatComponent.h"
 #include "Camera/CameraComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "Components/WidgetComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "Net/UnrealNetwork.h"
 #include "Weapon/Weapon.h"
 
@@ -32,15 +33,8 @@ ABlasterCharacter::ABlasterCharacter()
 	Combat->SetIsReplicated(true);
 
 	GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
-}
-
-void ABlasterCharacter::PostInitializeComponents()
-{
-	Super::PostInitializeComponents();
-	if (Combat)
-	{
-		Combat->Character = this;
-	}
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 }
 
 void ABlasterCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -48,6 +42,12 @@ void ABlasterCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME_CONDITION(ThisClass, OverlappingWeapon, COND_OwnerOnly);
+}
+
+void ABlasterCharacter::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+	if (Combat) Combat->Character = this;
 }
 
 void ABlasterCharacter::BeginPlay()
@@ -58,6 +58,7 @@ void ABlasterCharacter::BeginPlay()
 void ABlasterCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	AimOffset(DeltaTime);
 }
 
 void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -72,6 +73,9 @@ void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction("Equip", IE_Pressed, this, &ThisClass::EquipButtonPressed);
 	PlayerInputComponent->BindAction("Crouch", IE_Pressed, this, &ThisClass::CrouchButtonPressed);
+
+	PlayerInputComponent->BindAction("ADS", IE_Pressed, this, &ABlasterCharacter::ADSPressed);
+	PlayerInputComponent->BindAction("ADS", IE_Released, this, &ABlasterCharacter::ADSReleased);
 }
 
 void ABlasterCharacter::SetOverlappingWeapon(AWeapon* Weapon)
@@ -89,6 +93,11 @@ void ABlasterCharacter::SetOverlappingWeapon(AWeapon* Weapon)
 bool ABlasterCharacter::IsWeaponEquipped()
 {
 	return Combat && Combat->EquippedWeapon;
+}
+
+bool ABlasterCharacter::IsADS()
+{
+	return Combat && Combat->bIsADS;
 }
 
 void ABlasterCharacter::OnRep_OverlappingWeapon(AWeapon* LastWeapon)
@@ -159,5 +168,49 @@ void ABlasterCharacter::CrouchButtonPressed()
 	else
 	{
 		Crouch();
+	}
+}
+
+void ABlasterCharacter::ADSPressed()
+{
+	if (Combat) Combat->SetADS(true);
+}
+
+void ABlasterCharacter::ADSReleased()
+{
+	if (Combat) Combat->SetADS(false);
+}
+
+void ABlasterCharacter::AimOffset(float DeltaTime)
+{
+	if (Combat && Combat->EquippedWeapon == nullptr) return;
+
+	FVector Velocity{ GetVelocity() };
+	Velocity.Z = 0.f;
+	const float Speed = Velocity.Size();
+	const bool bIsInAir = GetCharacterMovement()->IsFalling();
+
+	if (Speed == 0.f && !bIsInAir)
+	{
+		const FRotator CurrentAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
+		const FRotator DeltaAimRotation = UKismetMathLibrary::NormalizedDeltaRotator(CurrentAimRotation, StartingAimRotation);
+		AO_Yaw = DeltaAimRotation.Yaw;
+		bUseControllerRotationYaw = false;
+	}
+
+	if (Speed > 0.f || bIsInAir)
+	{
+		StartingAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
+		AO_Yaw = 0.f;
+		bUseControllerRotationYaw = true;
+	}
+
+	AO_Pitch = GetBaseAimRotation().Pitch;
+	if (AO_Pitch > 90.f && !IsLocallyControlled())
+	{
+		// map pitch from [270, 360) to [-90, 0)
+		const FVector2d InRange(270.f, 360.f);
+		const FVector2d OutRange(-90.f, 0.f);
+		AO_Pitch = FMath::GetMappedRangeValueClamped(InRange, OutRange, AO_Pitch);
 	}
 }

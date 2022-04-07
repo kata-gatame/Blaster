@@ -7,8 +7,8 @@ UMultiplayerSessionsSubsystem::UMultiplayerSessionsSubsystem() :
 	CreateSessionCompleteDelegate(FOnCreateSessionCompleteDelegate::CreateUObject(this, &ThisClass::OnCreateSessionComplete)),
 	FindSessionsCompleteDelegate(FOnFindSessionsCompleteDelegate::CreateUObject(this, &ThisClass::OnFindSessionsComplete)),
 	JoinSessionCompleteDelegate(FOnJoinSessionCompleteDelegate::CreateUObject(this, &ThisClass::OnJoinSessionComplete)),
-	DestroySessionCompleteDelegate(FOnDestroySessionCompleteDelegate::CreateUObject(this, &ThisClass::OnDestroySessionComplete)),
-	StartSessionCompleteDelegate(FOnStartSessionCompleteDelegate::CreateUObject(this, &ThisClass::OnStartSessionComplete))
+	StartSessionCompleteDelegate(FOnStartSessionCompleteDelegate::CreateUObject(this, &ThisClass::OnStartSessionComplete)),
+	DestroySessionCompleteDelegate(FOnDestroySessionCompleteDelegate::CreateUObject(this, &ThisClass::OnDestroySessionComplete))
 {
 	IOnlineSubsystem* Subsystem = IOnlineSubsystem::Get();
 	if (Subsystem)
@@ -35,6 +35,7 @@ void UMultiplayerSessionsSubsystem::CreateSession(int32 NumPublicConnections, FS
 
 	LastSessionSettings = MakeShareable(new FOnlineSessionSettings());
 	LastSessionSettings->bIsLANMatch = IOnlineSubsystem::Get()->GetSubsystemName() == "NULL" ? true : false;
+	LastSessionSettings->bUseLobbiesIfAvailable = true;
 	LastSessionSettings->NumPublicConnections = NumPublicConnections;
 	LastSessionSettings->bUsesPresence = true;
 	LastSessionSettings->bAllowJoinInProgress = true;
@@ -86,6 +87,11 @@ void UMultiplayerSessionsSubsystem::JoinSession(const FOnlineSessionSearchResult
 	}
 }
 
+void UMultiplayerSessionsSubsystem::StartSession()
+{
+	
+}
+
 void UMultiplayerSessionsSubsystem::DestroySession()
 {
 	if (!SessionInterface.IsValid())
@@ -100,10 +106,6 @@ void UMultiplayerSessionsSubsystem::DestroySession()
 		SessionInterface->ClearOnDestroySessionCompleteDelegate_Handle(DestroySessionCompleteDelegateHandle);
 		MultiplayerOnStartSessionComplete.Broadcast(false);
 	}
-}
-
-void UMultiplayerSessionsSubsystem::StartSession()
-{
 }
 
 FTimerHandle UMultiplayerSessionsSubsystem::GetAwaitingPlayersDelay()
@@ -150,6 +152,11 @@ void UMultiplayerSessionsSubsystem::OnJoinSessionComplete(FName SessionName, EOn
 	MultiplayerOnJoinSessionComplete.Broadcast(Result);
 }
 
+void UMultiplayerSessionsSubsystem::OnStartSessionComplete(FName SessionName, bool bWasSuccessful)
+{
+	
+}
+
 void UMultiplayerSessionsSubsystem::OnDestroySessionComplete(FName SessionName, bool bWasSuccessful)
 {
 	if (SessionInterface)
@@ -164,8 +171,4 @@ void UMultiplayerSessionsSubsystem::OnDestroySessionComplete(FName SessionName, 
 	}
 
 	MultiplayerOnDestroySessionComplete.Broadcast(bWasSuccessful);
-}
-
-void UMultiplayerSessionsSubsystem::OnStartSessionComplete(FName SessionName, bool bWasSuccessful)
-{
 }

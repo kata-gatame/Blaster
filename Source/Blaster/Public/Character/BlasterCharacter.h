@@ -16,6 +16,9 @@ class BLASTER_API ABlasterCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
+	UPROPERTY(VisibleAnywhere)
+	UCombatComponent* Combat;
+
 	UPROPERTY(EditAnywhere, Category = "Camera")
 	USpringArmComponent* CameraBoom;
 
@@ -28,16 +31,15 @@ class BLASTER_API ABlasterCharacter : public ACharacter
 	UPROPERTY(ReplicatedUsing = OnRep_OverlappingWeapon)
 	AWeapon* OverlappingWeapon;
 
-	FString CharacterName;
-
 	UFUNCTION()
 	void OnRep_OverlappingWeapon(AWeapon* LastWeapon);
 
-	UPROPERTY(VisibleAnywhere)
-	UCombatComponent* Combat;
-
 	UFUNCTION(Server, Reliable)
 	void ServerEquipButtonPressed();
+
+	float AO_Yaw;
+	float AO_Pitch;
+	FRotator StartingAimRotation;
 
 protected:
 	virtual void BeginPlay() override;
@@ -51,6 +53,11 @@ protected:
 	// actions
 	void EquipButtonPressed();
 	void CrouchButtonPressed();
+	void ADSPressed();
+	void ADSReleased();
+
+	// aim
+	void AimOffset(float DeltaTime);
 
 public:
 	ABlasterCharacter();
@@ -61,6 +68,8 @@ public:
 
 	void SetOverlappingWeapon(AWeapon* Weapon);
 	bool IsWeaponEquipped();
-	
-	FORCEINLINE FString GetCharacterName() const { return CharacterName; }
+	bool IsADS();
+
+	FORCEINLINE float GetAO_Yaw() const { return AO_Yaw; }
+	FORCEINLINE float GetAO_Pitch() const { return AO_Pitch; }
 };

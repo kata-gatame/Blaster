@@ -15,9 +15,6 @@ class BLASTER_API UBlasterAnimInstance : public UAnimInstance
 	UPROPERTY(BlueprintReadOnly, Category = "Character", meta = (AllowPrivateAccess = "true"))
 	ABlasterCharacter* BlasterCharacter;
 
-	UPROPERTY(BlueprintReadOnly, Category = "Character", meta = (AllowPrivateAccess = "true"))
-	bool bIsWeaponEquipped;
-
 	UPROPERTY(BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
 	float Speed;
 
@@ -29,6 +26,28 @@ class BLASTER_API UBlasterAnimInstance : public UAnimInstance
 
 	UPROPERTY(BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
 	bool bIsCrouched;
+	
+	UPROPERTY(BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
+	float YawOffset;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
+	float Lean;
+	
+	UPROPERTY(BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
+	float AO_Yaw;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
+	float AO_Pitch;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Character", meta = (AllowPrivateAccess = "true"))
+	bool bIsWeaponEquipped;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	bool bIsADS;
+	
+	FRotator CharacterRotationLastFrame;
+    FRotator CharacterRotation;
+    FRotator DeltaRotation;
 
 public:
 	virtual void NativeInitializeAnimation() override;

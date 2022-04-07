@@ -15,11 +15,30 @@ class BLASTER_API UCombatComponent : public UActorComponent
 
 	ABlasterCharacter* Character;
 
-	UPROPERTY(Replicated)
+	UPROPERTY(ReplicatedUsing = OnRep_EquippedWeapon)
 	AWeapon* EquippedWeapon;
+
+	UPROPERTY(Replicated)
+	bool bIsADS;
+
+	UPROPERTY(EditAnywhere)
+	float BaseWalkSpeed;
+	
+	UPROPERTY(EditAnywhere)
+	float AimWalkSpeed;
 
 protected:
 	virtual void BeginPlay() override;
+
+	void SetADS(bool bADS);
+
+	UFUNCTION(Server, Reliable)
+	void ServerSetADS(bool bADS);
+
+	UFUNCTION()
+	void OnRep_EquippedWeapon() const;
+
+	void CorrectOrientation() const;
 
 public:
 	UCombatComponent();
