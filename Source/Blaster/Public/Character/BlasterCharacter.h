@@ -2,6 +2,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "BlasterTypes/TurningInPlace.h"
 #include "GameFramework/Character.h"
 #include "BlasterCharacter.generated.h"
 
@@ -39,7 +40,11 @@ class BLASTER_API ABlasterCharacter : public ACharacter
 
 	float AO_Yaw;
 	float AO_Pitch;
+	float InterpAO_Yaw;
 	FRotator StartingAimRotation;
+
+	ETurningInPlace TurningInPlace;
+	void TurnInPlace(float DeltaTime);
 
 protected:
 	virtual void BeginPlay() override;
@@ -49,6 +54,7 @@ protected:
 	void Strafe(float Value);
 	void Turn(float Value);
 	void Look(float Value);
+	virtual void Jump() override;
 
 	// actions
 	void EquipButtonPressed();
@@ -70,6 +76,9 @@ public:
 	bool IsWeaponEquipped();
 	bool IsADS();
 
+	AWeapon* GetEquippedWeapon();
+
 	FORCEINLINE float GetAO_Yaw() const { return AO_Yaw; }
 	FORCEINLINE float GetAO_Pitch() const { return AO_Pitch; }
+	FORCEINLINE ETurningInPlace GetTurningInPlace() const { return TurningInPlace; }
 };
