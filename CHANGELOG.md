@@ -1,5 +1,16 @@
 # Changelog
 
+## [b6a919e](https://github.com/kata-gatame/Blaster/commit/b6a919e5393dc8ea763971d815ddb2228bf43688) Section 4 (The Weapon) Complete
+
+### The following section is in progress:
+   - Firing Weapons
+
+### The folowing sections completed:
+   1. Introduction
+   2. Creating a Multiplayer Plugin
+   3. Project Creation
+   4. The Weapon
+
 ## [82eddc3](https://github.com/kata-gatame/Blaster/commit/82eddc3741aab2c2c353c11955703e165a4abcaa) Initial Project Commit
 
 ### The following section is in progress:
